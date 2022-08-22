@@ -1,9 +1,9 @@
-from ..biotools import extract_graphical_translation
+from ..biotools import extract_graphical_translation, reverse_complement
 
 
 class SequenceAndTranslationMixin:
     def plot_sequence(
-        self, ax, location=None, y_offset=1, fontdict=None, guides_intensity=0
+        self, ax, location=None, y_offset=1, fontdict=None, guides_intensity=0, reverse=False
     ):
         """Plot a sequence of nucleotides at the bottom of the plot.
 
@@ -40,7 +40,11 @@ class SequenceAndTranslationMixin:
             location = self.span
         location_start, location_end = location
         fontdict = {"size": 11, **(fontdict or {})}
-        for i, nucleotide in enumerate(self.sequence):
+        sequence = self.sequence
+        if reverse is True:
+            sequence = reverse_sequence(self.sequence)
+            fontdict['color'] = 'grey'
+        for i, nucleotide in enumerate(sequence):
             index = i + location_start
             if location_start <= index <= location_end:
                 ax.text(
@@ -133,3 +137,8 @@ class SequenceAndTranslationMixin:
                 )
         if guides_intensity:
             ax.axvline(end - 0.5, linewidth=0.1, color=guides_color, zorder=-10000)
+
+def reverse_sequence(seq):
+    translator = str.maketrans('ATGCatgc', 'TACGtacg')
+    seq_r = seq.translate(translator)
+    return seq_r
